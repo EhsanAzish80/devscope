@@ -1,4 +1,4 @@
-# devscope
+# Devscope
 
 **Universal Codebase Intelligence for CI & Teams**
 
