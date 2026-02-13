@@ -6,9 +6,9 @@
 ![Badge](https://img.shields.io/badge/cache-cold-lightgrey)
 
 **Repo:** Devscope  
-**Files:** 37  
-**Lines:** 8,148  
-**Languages:** Python (70%) · Markdown (14%) · Shell (8%)
+**Files:** 39  
+**Lines:** 8,345  
+**Languages:** Python (67%) · Markdown (15%) · Shell (10%)
 
 **Health:** B (82.5)  
 **Risk:** Low  
@@ -17,6 +17,6 @@
 **Tests:** 1.00 ratio  
 **Last commit:** today  
 
-**Top hotspot:** README.md (557 LOC, Very large file (557 LOC), No nearby tests)
+**Top hotspot:** README.md (560 LOC, Very large file (560 LOC), No nearby tests)
 
 ⚡ Scan time: 0.06s
