@@ -1,9 +1,28 @@
 """Formatters for devscope output - badges, markdown, summaries."""
 
+import os
 from typing import Optional
 from urllib.parse import quote
 
 from devscope.models import AnalysisResult, Grade, OnboardingDifficulty, RiskLevel
+
+
+def is_ci_environment() -> bool:
+    """Detect if running in a CI environment.
+    
+    Returns:
+        True if running in CI, False otherwise
+    """
+    ci_indicators = [
+        "CI",
+        "GITHUB_ACTIONS",
+        "GITLAB_CI",
+        "CIRCLECI",
+        "TRAVIS",
+        "JENKINS_HOME",
+        "BUILDKITE",
+    ]
+    return any(os.environ.get(var) for var in ci_indicators)
 
 
 def get_grade_color(grade: str) -> str:
@@ -125,8 +144,16 @@ def generate_badges(result: AnalysisResult) -> dict[str, str]:
     # Cache badge (if available)
     if result.cache_stats and result.cache_stats.get("enabled"):
         hit_rate = result.cache_stats.get("hit_rate", 0)
-        cache_color = get_cache_color(hit_rate)
-        badges["cache"] = generate_badge_url("cache", f"{hit_rate:.0f}%", cache_color)
+        
+        # In CI with low cache hit, show "cold" instead of "0%"
+        if is_ci_environment() and hit_rate < 10:
+            cache_message = "cold"
+            cache_color = "lightgrey"
+        else:
+            cache_message = f"{hit_rate:.0f}%"
+            cache_color = get_cache_color(hit_rate)
+        
+        badges["cache"] = generate_badge_url("cache", cache_message, cache_color)
     
     return badges
 

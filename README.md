@@ -6,8 +6,8 @@ Analyze any repository in seconds. Get a maintainability grade, risk level, onbo
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 131 passing](https://img.shields.io/badge/tests-131%20passing-brightgreen.svg)]()
-[![Coverage: 81%](https://img.shields.io/badge/coverage-81%25-green.svg)]()
+[![Tests: 133 passing](https://img.shields.io/badge/tests-133%20passing-brightgreen.svg)]()
+[![Coverage: 82%](https://img.shields.io/badge/coverage-82%25-green.svg)]()
 
 ## 🚀 Install in 10 Seconds
 
@@ -17,6 +17,14 @@ devscope scan .
 ```
 
 That's it. No config files. No setup. Just intelligence.
+
+**Try it now:**
+```bash
+devscope summary --compact
+```
+```
+Devscope: B · Low risk · Easy onboarding · 1.00 tests · 0.06s ⚡
+```
 
 ---
 
@@ -31,6 +39,40 @@ That's it. No config files. No setup. Just intelligence.
 | **Intelligent caching** | ✅ 10-20x speedup | ❌ | ❌ |
 | **Risk & onboarding metrics** | ✅ Built-in | ❌ | ❌ |
 | **Test coverage detection** | ✅ Automatic | ❌ | ❌ |
+
+---
+
+## 🌍 Real-World Examples
+
+See devscope analyzing popular open-source projects:
+
+<!-- BENCHMARKS_START -->
+### [fastapi](https://github.com/tiangolo/fastapi)
+
+```
+Devscope: A · Low risk · Moderate onboarding · 1.01 tests · 3.38s ⚡
+```
+
+### [django](https://github.com/django/django)
+
+```
+Devscope: B · Low risk · Hard onboarding · 2.79 tests · 7.29s ⚡
+```
+
+### [typer](https://github.com/tiangolo/typer)
+
+```
+Devscope: A · Low risk · Moderate onboarding · 0.89 tests · 0.66s ⚡
+```
+
+### [requests](https://github.com/psf/requests)
+
+```
+Devscope: B · Low risk · Easy onboarding · 1.91 tests · 0.15s ⚡
+```
+
+_Benchmarks run on GitHub Actions (2-core Linux VM)._
+<!-- BENCHMARKS_END -->
 
 ---
 
@@ -61,23 +103,23 @@ This repository is continuously analyzed by devscope.
 ![Badge](https://img.shields.io/badge/maintainability-B-green)
 ![Badge](https://img.shields.io/badge/risk-Low-green)
 ![Badge](https://img.shields.io/badge/onboarding-Easy-blue)
-![Badge](https://img.shields.io/badge/cache-0%25-orange)
+![Badge](https://img.shields.io/badge/cache-92%25-success)
 
 **Repo:** devscope  
 **Files:** 36  
-**Lines:** 8,006  
+**Lines:** 8,069  
 **Languages:** Python (72%) · Markdown (14%) · Shell (6%)
 
-**Health:** B (82.5)  
+**Health:** B (84.0)  
 **Risk:** Low  
 **Onboarding:** Easy  
 
 **Tests:** 1.00 ratio  
 **Last commit:** today  
 
-**Top hotspot:** README.md (515 LOC, Very large file (515 LOC), No nearby tests)
+**Top hotspot:** uv.lock (821 LOC, Very large file (821 LOC), No nearby tests)
 
-⚡ Scan time: 0.06s
+⚡ Scan time: 0.06s (cache: 92% hit rate)
 
 _This report is automatically updated on every push._
 
@@ -370,8 +412,8 @@ devscope summary --json          # JSON with badges
 
 | Metric | Value |
 |--------|-------|
-| **Tests** | 131 passing |
-| **Coverage** | 81% |
+| **Tests** | 133 passing |
+| **Coverage** | 82% |
 | **Type checking** | mypy strict mode |
 | **Platforms** | Linux · macOS · Windows |
 | **Python** | 3.9+ |

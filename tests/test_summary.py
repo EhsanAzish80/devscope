@@ -21,6 +21,7 @@ from devscope.formatters import (
     get_grade_color,
     get_onboarding_color,
     get_risk_color,
+    is_ci_environment,
 )
 from devscope.models import OnboardingDifficulty, RiskLevel
 
@@ -80,6 +81,22 @@ class TestBadgeGeneration:
         """Test badge URL encoding with percent signs."""
         url = generate_badge_url("cache", "91%", "success")
         assert "91%25" in url  # % should be encoded as %25
+
+    def test_ci_environment_detection(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test CI environment detection."""
+        # Test with no CI env vars
+        monkeypatch.delenv("CI", raising=False)
+        monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+        assert is_ci_environment() is False
+        
+        # Test with CI=true
+        monkeypatch.setenv("CI", "true")
+        assert is_ci_environment() is True
+        
+        # Test with GITHUB_ACTIONS
+        monkeypatch.delenv("CI", raising=False)
+        monkeypatch.setenv("GITHUB_ACTIONS", "true")
+        assert is_ci_environment() is True
 
 
 class TestFormatHelpers:
@@ -165,6 +182,25 @@ class TestMarkdownGeneration:
             # Check structure is the same
             assert "## 🔍 Devscope Report" in result1.output
             assert "## 🔍 Devscope Report" in result2.output
+
+    def test_cache_badge_in_ci(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test cache badge shows 'cold' in CI with low hit rate."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "test.py").write_text("x = 1\n" * 50)
+
+            # Simulate CI environment
+            monkeypatch.setenv("CI", "true")
+
+            # First run with cleared cache (will have low/zero hit rate)
+            runner = CliRunner()
+            result = runner.invoke(cli, ["summary", str(root), "--no-git", "--clear-cache", "--badges"])
+
+            assert result.exit_code == 0
+            output = result.output
+
+            # Should show "cold" instead of "0%" in CI
+            assert "cache-cold" in output or "cache: 0%" not in output
 
 
 class TestCompactSummary:

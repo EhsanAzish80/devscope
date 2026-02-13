@@ -1,0 +1,76 @@
+name: Update Benchmarks
+
+on:
+  schedule:
+    # Run every Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  update-benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install devscope
+        run: |
+          uv sync --all-extras
+          uv pip install -e .
+
+      - name: Run benchmarks
+        run: |
+          chmod +x scripts/benchmarks.sh
+          uv run bash scripts/benchmarks.sh > /tmp/benchmarks.txt
+
+      - name: Update README with benchmarks
+        run: |
+          python3 << 'EOF'
+          import re
+          
+          # Read the current README
+          with open('README.md', 'r') as f:
+              readme = f.read()
+          
+          # Read the benchmark results
+          with open('/tmp/benchmarks.txt', 'r') as f:
+              benchmarks = f.read().strip()
+          
+          # Pattern to match the benchmark section between markers
+          pattern = r'<!-- BENCHMARKS_START -->.*?<!-- BENCHMARKS_END -->'
+          
+          # Replace the benchmark section with new content
+          new_section = f'<!-- BENCHMARKS_START -->\n{benchmarks}\n<!-- BENCHMARKS_END -->'
+          updated = re.sub(pattern, new_section, readme, flags=re.DOTALL)
+          
+          # Write back
+          with open('README.md', 'w') as f:
+              f.write(updated)
+          EOF
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet README.md || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push if changed
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "chore: update benchmarks [skip ci]"
+          git push
