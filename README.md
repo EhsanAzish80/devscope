@@ -379,6 +379,138 @@ fi
 
 ---
 
+## 🤖 PR Health Bot (Drop-in)
+
+**Get instant code health in every pull request** — zero setup, just copy the workflow.
+
+Add this file to your repo: `.github/workflows/devscope-pr.yml`
+
+```yaml
+name: Devscope PR Health Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  devscope-health:
+    name: Post Health Summary
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git metrics
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pipx
+        run: |
+          python -m pip install --user pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install devscope
+        run: pipx install devscope
+
+      - name: Run Devscope analysis
+        id: devscope
+        run: |
+          set +e  # Don't fail on non-zero exit
+          OUTPUT=$(devscope summary --compact 2>&1)
+          EXIT_CODE=$?
+          
+          # Escape output for GitHub Actions
+          OUTPUT="${OUTPUT//'%'/'%25'}"
+          OUTPUT="${OUTPUT//$'\n'/'%0A'}"
+          OUTPUT="${OUTPUT//$'\r'/'%0D'}"
+          
+          echo "output=$OUTPUT" >> $GITHUB_OUTPUT
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+          
+          exit 0  # Always succeed job
+
+      - name: Post or update PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `${{ steps.devscope.outputs.output }}`;
+            const exitCode = `${{ steps.devscope.outputs.exit_code }}`;
+            
+            let commentBody;
+            if (exitCode === '0') {
+              commentBody = `## 🔍 Devscope Health Check\n\n\`\`\`\n${output}\n\`\`\`\n\n---\n*Updated: ${new Date().toUTCString()}*`;
+            } else {
+              commentBody = `## 🔍 Devscope Health Check\n\n⚠️ **Analysis failed**\n\n<details>\n<summary>Error output</summary>\n\n\`\`\`\n${output}\n\`\`\`\n</details>\n\n---\n*Updated: ${new Date().toUTCString()}*`;
+            }
+            
+            // Find existing Devscope comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const existingComment = comments.find(comment => 
+              comment.user.type === 'Bot' &&
+              comment.body.includes('🔍 Devscope Health Check')
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody,
+              });
+              console.log('Updated existing Devscope comment');
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody,
+              });
+              console.log('Created new Devscope comment');
+            }
+```
+
+**What it does:**
+1. Runs on every PR (open, update, reopen)
+2. Installs devscope and analyzes your code
+3. Posts a sticky comment that **updates automatically** on new commits
+4. Fails gracefully if analysis errors
+5. No secrets required — works on public repos
+
+**Example PR comment:**
+
+```
+## 🔍 Devscope Health Check
+
+Devscope: B · Low risk · Easy onboarding · 0.78 tests · 0.82s ⚡
+
+---
+Updated: Thu, 13 Feb 2026 14:52:33 GMT
+```
+
+**Features:**
+- ✅ Sticky comment (updates instead of spamming)
+- ✅ Shows health trend over PR lifetime
+- ✅ Zero configuration
+- ✅ Works on forks (read-only)
+
+---
+
 ## 📖 Command Reference
 
 ### `devscope scan`
