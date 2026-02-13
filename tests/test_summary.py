@@ -12,6 +12,7 @@ from devscope.formatters import (
     format_days_since_commit,
     format_languages,
     generate_badge_url,
+    generate_health_block,
     get_cache_color,
     get_grade_color,
     get_onboarding_color,
@@ -419,3 +420,307 @@ class TestSummaryCLIIntegration:
         result = runner.invoke(cli, ["summary", "/nonexistent/path"])
 
         assert result.exit_code != 0
+
+
+class TestHealthBlockGeneration:
+    """Test health block generation for README injection."""
+
+    def test_generate_health_block_basic(self) -> None:
+        """Test basic health block generation."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "test.py").write_text("def hello(): pass\n" * 10)
+
+            runner = CliRunner()
+            result = runner.invoke(cli, ["scan", str(root), "--no-git", "--json"])
+            assert result.exit_code == 0
+
+            from devscope.analyzer import CodebaseAnalyzer
+            analyzer = CodebaseAnalyzer(root, detect_git=False, enable_intelligence=True)
+            analysis_result = analyzer.analyze()
+
+            health_block = generate_health_block(analysis_result)
+
+            # Verify structure
+            assert "## 🔍 Devscope Report" in health_block
+            assert "**Repo:**" in health_block
+            assert "**Files:**" in health_block
+            assert "**Lines:**" in health_block
+            assert "⚡ Scan time:" in health_block
+
+    def test_generate_health_block_deterministic(self) -> None:
+        """Test that health block generation is deterministic."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "test.py").write_text("def hello(): pass\n" * 10)
+
+            from devscope.analyzer import CodebaseAnalyzer
+            analyzer = CodebaseAnalyzer(root, detect_git=False, enable_intelligence=True)
+
+            # Run analysis twice
+            result1 = analyzer.analyze()
+            result2 = analyzer.analyze()
+
+            # Generate health blocks
+            block1 = generate_health_block(result1)
+            block2 = generate_health_block(result2)
+
+            # Should be identical (deterministic)
+            assert block1 == block2
+
+    def test_generate_health_block_with_badges(self) -> None:
+        """Test health block includes badges."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "test.py").write_text("def hello(): pass\n" * 10)
+
+            from devscope.analyzer import CodebaseAnalyzer
+            analyzer = CodebaseAnalyzer(root, detect_git=False, enable_intelligence=True)
+            analysis_result = analyzer.analyze()
+
+            health_block = generate_health_block(analysis_result)
+
+            # Should include badge URLs
+            assert "![Badge](" in health_block
+            assert "img.shields.io" in health_block
+            assert "maintainability" in health_block
+
+
+class TestInjectCommand:
+    """Test devscope inject command."""
+
+    def test_inject_command_basic(self) -> None:
+        """Test basic inject functionality."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            readme = root / "README.md"
+
+            # Create README with markers
+            readme.write_text("""# My Project
+
+Some intro text.
+
+<!-- DEVSCOPE_START -->
+<!-- DEVSCOPE_END -->
+
+More content below.
+""")
+
+            # Create some code to analyze
+            (root / "test.py").write_text("def hello(): pass\n" * 10)
+
+            runner = CliRunner()
+            result = runner.invoke(cli, ["inject", str(readme), "--no-git"])
+
+            assert result.exit_code == 0
+            assert "Updated README.md" in result.output
+
+            # Verify README was updated
+            updated_content = readme.read_text()
+            assert "## 🔍 Devscope Report" in updated_content
+            assert "**Repo:**" in updated_content
+            assert "<!-- DEVSCOPE_START -->" in updated_content
+            assert "<!-- DEVSCOPE_END -->" in updated_content
+
+    def test_inject_command_idempotent(self) -> None:
+        """Test inject is idempotent (no change = no write)."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            readme = root / "README.md"
+
+            # Create README with markers
+            readme.write_text("""# My Project
+
+<!-- DEVSCOPE_START -->
+<!-- DEVSCOPE_END -->
+""")
+
+            # Create some code
+            (root / "test.py").write_text("def hello(): pass\n" * 10)
+
+            runner = CliRunner()
+
+            # First injection
+            result1 = runner.invoke(cli, ["inject", str(readme), "--no-git"])
+            assert result1.exit_code == 0
+            assert "Updated README.md" in result1.output
+
+            # Get modified time
+            import time
+            time.sleep(0.1)  # Ensure timestamps differ if file changes
+            mtime1 = readme.stat().st_mtime
+
+            # Second injection (should detect no change)
+            result2 = runner.invoke(cli, ["inject", str(readme), "--no-git"])
+            assert result2.exit_code == 0
+            assert "up to date" in result2.output.lower()
+
+            # Verify file wasn't rewritten
+            mtime2 = readme.stat().st_mtime
+            assert mtime1 == mtime2
+
+    def test_inject_command_missing_markers(self) -> None:
+        """Test inject fails gracefully when markers missing."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            readme = root / "README.md"
+
+            # Create README without markers
+            readme.write_text("# My Project\n\nNo markers here.\n")
+
+            runner = CliRunner()
+            result = runner.invoke(cli, ["inject", str(readme)])
+
+            assert result.exit_code == 1
+            assert "Markers not found" in result.output
+            assert "DEVSCOPE_START" in result.output
+
+    def test_inject_command_check_mode(self) -> None:
+        """Test inject --check mode."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            readme = root / "README.md"
+
+            # Create README with markers
+            readme.write_text("""# My Project
+
+<!-- DEVSCOPE_START -->
+<!-- DEVSCOPE_END -->
+""")
+
+            (root / "test.py").write_text("def hello(): pass\n" * 10)
+
+            runner = CliRunner()
+
+            # Check mode on fresh README (should exit 2 - update needed)
+            result1 = runner.invoke(cli, ["inject", str(readme), "--no-git", "--check"])
+            assert result1.exit_code == 2
+            assert "needs update" in result1.output.lower()
+
+            # Verify file was NOT modified
+            content = readme.read_text()
+            assert "## 🔍 Devscope Report" not in content
+
+            # Actually inject
+            result2 = runner.invoke(cli, ["inject", str(readme), "--no-git"])
+            assert result2.exit_code == 0
+
+            # Check mode on updated README (should exit 0 - no change)
+            result3 = runner.invoke(cli, ["inject", str(readme), "--no-git", "--check"])
+            assert result3.exit_code == 0
+            assert "No changes needed" in result3.output
+
+    def test_inject_command_custom_markers(self) -> None:
+        """Test inject with custom markers."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            readme = root / "README.md"
+
+            # Create README with custom markers
+            readme.write_text("""# My Project
+
+<!-- CUSTOM_START -->
+<!-- CUSTOM_END -->
+""")
+
+            (root / "test.py").write_text("def hello(): pass\n" * 10)
+
+            runner = CliRunner()
+            result = runner.invoke(
+                cli,
+                [
+                    "inject",
+                    str(readme),
+                    "--no-git",
+                    "--start-marker=<!-- CUSTOM_START -->",
+                    "--end-marker=<!-- CUSTOM_END -->",
+                ],
+            )
+
+            assert result.exit_code == 0
+            assert "Updated README.md" in result.output
+
+            # Verify content was injected between custom markers
+            updated_content = readme.read_text()
+            assert "<!-- CUSTOM_START -->" in updated_content
+            assert "<!-- CUSTOM_END -->" in updated_content
+            assert "## 🔍 Devscope Report" in updated_content
+
+    def test_inject_command_separate_repo_path(self) -> None:
+        """Test inject can analyze separate repo path."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            docs_dir = root / "docs"
+            src_dir = root / "src"
+
+            docs_dir.mkdir()
+            src_dir.mkdir()
+
+            readme = docs_dir / "README.md"
+            readme.write_text("""# Docs
+
+<!-- DEVSCOPE_START -->
+<!-- DEVSCOPE_END -->
+""")
+
+            # Create code in src directory
+            (src_dir / "main.py").write_text("def main(): pass\n" * 20)
+
+            runner = CliRunner()
+            result = runner.invoke(
+                cli,
+                [
+                    "inject",
+                    str(readme),
+                    "--repo",
+                    str(src_dir),
+                    "--no-git",
+                ],
+            )
+
+            assert result.exit_code == 0
+
+            # Verify health block reflects src directory analysis
+            updated_content = readme.read_text()
+            assert "## 🔍 Devscope Report" in updated_content
+
+    def test_inject_command_preserves_surrounding_content(self) -> None:
+        """Test inject preserves content before and after markers."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            readme = root / "README.md"
+
+            original_content = """# My Project
+
+Introduction paragraph.
+
+<!-- DEVSCOPE_START -->
+Old content here
+<!-- DEVSCOPE_END -->
+
+## Other Section
+
+More content below.
+"""
+            readme.write_text(original_content)
+            (root / "test.py").write_text("def hello(): pass\n" * 10)
+
+            runner = CliRunner()
+            result = runner.invoke(cli, ["inject", str(readme), "--no-git"])
+
+            assert result.exit_code == 0
+
+            updated_content = readme.read_text()
+
+            # Verify surrounding content preserved
+            assert "# My Project" in updated_content
+            assert "Introduction paragraph" in updated_content
+            assert "## Other Section" in updated_content
+            assert "More content below" in updated_content
+
+            # Verify health block injected
+            assert "## 🔍 Devscope Report" in updated_content
+
+            # Verify old content replaced
+            assert "Old content here" not in updated_content
+

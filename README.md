@@ -640,6 +640,71 @@ devscope summary --compact       # One-line summary
 devscope summary --json          # JSON with badges
 ```
 
+### `devscope inject`
+
+Inject health metrics into README between markers. **Auto-updating health blocks!**
+
+```bash
+devscope inject                  # Inject into ./README.md
+devscope inject docs/STATUS.md   # Inject into specific file
+devscope inject --check          # Check if update needed (exit 2 if yes)
+devscope inject --repo ./src     # Analyze different directory
+```
+
+**Setup:** Add markers to your README:
+
+```markdown
+# My Project
+
+<!-- DEVSCOPE_START -->
+<!-- DEVSCOPE_END -->
+```
+
+**Result:** Health block auto-injected between markers:
+
+````markdown
+<!-- DEVSCOPE_START -->
+## 🔍 Devscope Report
+
+![Badge](https://img.shields.io/badge/maintainability-B-green)
+![Badge](https://img.shields.io/badge/risk-Low-green)
+
+**Repo:** my-project  
+**Files:** 1,247  
+**Lines:** 45,892  
+**Languages:** Python (45%) · TypeScript (33%)
+
+**Health:** B (82.5)  
+**Risk:** Low  
+**Onboarding:** Easy  
+
+⚡ Scan time: 0.82s
+<!-- DEVSCOPE_END -->
+````
+
+**CI integration:**
+
+```yaml
+- name: Update health block
+  run: |
+    devscope inject
+    if git diff --quiet README.md; then
+      echo "No changes"
+    else
+      git config user.name "devscope-bot"
+      git config user.email "bot@devscope"
+      git add README.md
+      git commit -m "chore: update health metrics [skip ci]"
+      git push
+    fi
+```
+
+**Features:**
+- ✅ Deterministic output (no change = no commit)
+- ✅ Automatic badge generation
+- ✅ Custom markers supported
+- ✅ Check mode for CI validation
+
 ---
 
 ## 🏆 Status & Quality

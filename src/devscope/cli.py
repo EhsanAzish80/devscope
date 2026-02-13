@@ -15,6 +15,7 @@ from devscope.analyzer import CodebaseAnalyzer
 from devscope.cache import CacheManager
 from devscope.formatters import (
     generate_compact_summary,
+    generate_health_block,
     generate_json_summary,
     generate_markdown_summary,
 )
@@ -631,6 +632,136 @@ def summary(
 
     except Exception as e:
         console.print(f"\n[red]Error:[/red] {str(e)}", style="bold")
+        sys.exit(1)
+
+
+@cli.command()
+@click.argument("readme_path", type=click.Path(exists=True), required=False)
+@click.option("--repo", "repo_path", type=click.Path(exists=True), help="Repository path to analyze (default: same as README)")
+@click.option("--no-git", is_flag=True, help="Skip git repository detection")
+@click.option("--no-cache", is_flag=True, help="Disable caching for this scan")
+@click.option("--check", is_flag=True, help="Check if injection is needed without writing")
+@click.option("--start-marker", default="<!-- DEVSCOPE_START -->", help="Start marker for injection block")
+@click.option("--end-marker", default="<!-- DEVSCOPE_END -->", help="End marker for injection block")
+def inject(
+    readme_path: Optional[str],
+    repo_path: Optional[str],
+    no_git: bool,
+    no_cache: bool,
+    check: bool,
+    start_marker: str,
+    end_marker: str,
+) -> None:
+    """Inject health metrics into README between markers.
+    
+    Updates README.md (or specified file) with current health metrics between
+    marker comments. Only writes if content has changed (idempotent).
+    
+    Markers in your README:
+        <!-- DEVSCOPE_START -->
+        (health block will be injected here)
+        <!-- DEVSCOPE_END -->
+    
+    README_PATH: Path to README file (default: ./README.md)
+    
+    Exit codes:
+      - 0: Success (content updated or unchanged)
+      - 1: Error (missing markers, invalid path, etc.)
+      - 2: Check mode - update needed
+    """
+    # Determine paths
+    readme_file = Path(readme_path) if readme_path else Path.cwd() / "README.md"
+    scan_path = Path(repo_path) if repo_path else readme_file.parent
+    
+    readme_file = readme_file.resolve()
+    scan_path = scan_path.resolve()
+    
+    # Validate README exists
+    if not readme_file.exists():
+        console.print(f"[red]Error:[/red] README not found: {readme_file}")
+        sys.exit(1)
+    
+    try:
+        # Read current README content
+        with open(readme_file, "r", encoding="utf-8") as f:
+            original_content = f.read()
+        
+        # Check for markers
+        if start_marker not in original_content or end_marker not in original_content:
+            console.print(f"[red]Error:[/red] Markers not found in {readme_file.name}")
+            console.print(f"\nAdd these markers to your README:\n")
+            console.print(f"    {start_marker}")
+            console.print(f"    {end_marker}\n")
+            sys.exit(1)
+        
+        # Set up cache manager
+        cache_manager = None
+        if not no_cache:
+            cache_dir = Path(scan_path) / ".devscope_cache"
+            cache_manager = CacheManager(cache_dir, enabled=True)
+        
+        # Run analysis
+        analyzer = CodebaseAnalyzer(
+            scan_path, 
+            detect_git=not no_git, 
+            enable_intelligence=True, 
+            cache_manager=cache_manager
+        )
+        
+        if not check:
+            console.print(f"[dim]Analyzing {scan_path.name}...[/dim]")
+        
+        result = analyzer.analyze()
+        
+        # Generate health block
+        health_block = generate_health_block(result)
+        
+        # Build new content
+        start_idx = original_content.find(start_marker)
+        end_idx = original_content.find(end_marker)
+        
+        if start_idx == -1 or end_idx == -1 or start_idx >= end_idx:
+            console.print(f"[red]Error:[/red] Invalid marker positions in {readme_file.name}")
+            sys.exit(1)
+        
+        # Extract sections carefully to preserve spacing
+        before_marker = original_content[:start_idx + len(start_marker)]
+        after_marker = original_content[end_idx:]
+        
+        # Build new content with health block
+        # Ensure exactly one newline before health block, and health block ends with newline
+        if not health_block.endswith('\n'):
+            health_block += '\n'
+        
+        new_content = f"{before_marker}\n{health_block}{after_marker}"
+        
+        # Check if content changed
+        if new_content == original_content:
+            if check:
+                console.print(f"[green]✓[/green] No changes needed")
+                sys.exit(0)
+            else:
+                console.print(f"[green]✓[/green] Health block up to date (no changes)")
+                return
+        
+        # Check mode - report difference and exit
+        if check:
+            console.print(f"[yellow]⚠[/yellow]  Health block needs update")
+            sys.exit(2)
+        
+        # Write updated content
+        with open(readme_file, "w", encoding="utf-8") as f:
+            f.write(new_content)
+        
+        console.print(f"[green]✓[/green] Updated {readme_file.name}")
+        console.print(f"[dim]  Grade: {result.health_score.maintainability_grade if result.health_score else 'N/A'}[/dim]")
+        console.print(f"[dim]  Scan time: {result.scan_time:.2f}s[/dim]")
+    
+    except Exception as e:
+        console.print(f"\n[red]Error:[/red] {str(e)}", style="bold")
+        import traceback
+        if "--debug" in sys.argv:
+            traceback.print_exc()
         sys.exit(1)
 
 

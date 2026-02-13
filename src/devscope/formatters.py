@@ -309,6 +309,76 @@ def generate_compact_summary(result: AnalysisResult) -> str:
     return " ".join(parts)
 
 
+def generate_health_block(result: AnalysisResult, include_timing: bool = False) -> str:
+    """Generate deterministic health block for README injection.
+    
+    This produces a stable, consistent markdown block that can be injected
+    into README files. Output is deterministic - same inputs produce identical
+    output, preventing unnecessary commits.
+    
+    Args:
+        result: Analysis result with health metrics
+        include_timing: Include scan time (makes output non-deterministic)
+        
+    Returns:
+        Markdown health block for README embedding
+    """
+    lines = ["## 🔍 Devscope Report\n"]
+    
+    # Badges - exclude cache badge (non-deterministic)
+    # Only include stable metrics: maintainability, risk, onboarding
+    badges = generate_badges(result)
+    badge_order = ["maintainability", "risk", "onboarding"]  # Exclude cache
+    for badge_name in badge_order:
+        if badge_name in badges:
+            lines.append(f"![Badge]({badges[badge_name]})")
+    lines.append("")  # Blank line after badges
+    
+    # Repository metadata - consistent formatting
+    lines.append(f"**Repo:** {result.repo_name or 'Unknown'}  ")
+    lines.append(f"**Files:** {result.total_files}  ")
+    lines.append(f"**Lines:** {result.total_lines}  ")
+    
+    # Languages - sorted for determinism
+    if result.languages:
+        lang_str = format_languages(result.languages)
+        lines.append(f"**Languages:** {lang_str}\n")
+    else:
+        lines.append("")
+    
+    # Health metrics
+    if result.health_score:
+        grade = result.health_score.maintainability_grade
+        overall_score = result.health_score.score_breakdown.get("overall", 0)
+        lines.append(f"**Health:** {grade} ({overall_score:.1f})  ")
+        lines.append(f"**Risk:** {result.health_score.risk_level.value}  ")
+        lines.append(f"**Onboarding:** {result.health_score.onboarding_difficulty.value}  \n")
+    
+    # Test metrics
+    if result.test_metrics:
+        test_ratio = result.test_metrics.test_ratio
+        lines.append(f"**Tests:** {test_ratio:.2f} ratio  ")
+    
+    # Git metrics
+    if result.git_metrics and result.git_metrics.is_git_repo:
+        days = result.git_metrics.days_since_last_commit
+        days_str = format_days_since_commit(days)
+        lines.append(f"**Last commit:** {days_str}  \n")
+    else:
+        lines.append("")
+    
+    # Top hotspot (if any)
+    if result.hotspots:
+        hotspot = result.hotspots[0]
+        lines.append(f"**Top hotspot:** {hotspot.file_path} ({hotspot.lines_of_code} LOC, {hotspot.reason})\n")
+    
+    # Performance - only if explicitly requested (non-deterministic)
+    if include_timing:
+        lines.append(f"⚡ Scan time: {result.scan_time:.2f}s\n")
+    
+    return "\n".join(lines)
+
+
 def generate_json_summary(result: AnalysisResult) -> dict[str, Any]:
     """Generate JSON summary for bots and integrations.
 
