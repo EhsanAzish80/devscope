@@ -32,6 +32,12 @@ dependencies = [
     "platformdirs>=4.0.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/EhsanAzish80/Devscope"
+Repository = "https://github.com/EhsanAzish80/Devscope"
+Issues = "https://github.com/EhsanAzish80/Devscope/issues"
+Changelog = "https://github.com/EhsanAzish80/Devscope/releases"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4.0",
