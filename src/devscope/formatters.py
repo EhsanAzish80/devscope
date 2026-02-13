@@ -335,7 +335,10 @@ def generate_health_block(result: AnalysisResult, include_timing: bool = False) 
     lines.append("")  # Blank line after badges
     
     # Repository metadata - consistent formatting
-    lines.append(f"**Repo:** {result.repo_name or 'Unknown'}  ")
+    # Use basename of repo_name for stability (avoids temp path issues)
+    from pathlib import Path
+    repo_display = Path(result.repo_name).name if result.repo_name else 'Unknown'
+    lines.append(f"**Repo:** {repo_display}  ")
     lines.append(f"**Files:** {result.total_files}  ")
     lines.append(f"**Lines:** {result.total_lines}  ")
     
@@ -370,7 +373,9 @@ def generate_health_block(result: AnalysisResult, include_timing: bool = False) 
     # Top hotspot (if any)
     if result.hotspots:
         hotspot = result.hotspots[0]
-        lines.append(f"**Top hotspot:** {hotspot.file_path} ({hotspot.lines_of_code} LOC, {hotspot.reason})\n")
+        # Use basename for file path to avoid temp directory issues
+        hotspot_file = Path(hotspot.file_path).name
+        lines.append(f"**Top hotspot:** {hotspot_file} ({hotspot.lines_of_code} LOC, {hotspot.reason})\n")
     
     # Performance - only if explicitly requested (non-deterministic)
     if include_timing:
