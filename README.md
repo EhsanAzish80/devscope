@@ -92,6 +92,8 @@ Devscope: B · Low risk · Easy onboarding · 1.91 tests · 0.15s ⚡
 _Benchmarks run on GitHub Actions (2-core Linux VM)._
 <!-- BENCHMARKS_END -->
 
+> 📊 **Want more examples?** See the [`/research`](research/) directory for detailed analysis reports of popular repositories, including full markdown summaries and scan metadata.
+
 ---
 
 ## ⚡ Blazing Fast

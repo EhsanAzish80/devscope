@@ -1,0 +1,24 @@
+{
+  "repo_name": "devscope",
+  "repo_url": "https://github.com/EhsanAzish80/Devscope",
+  "analyzed_at": "2026-02-13T18:14:58.447041",
+  "scan_time_seconds": 0.186452,
+  "metrics": {
+    "total_files": 51,
+    "total_lines": 10399,
+    "maintainability_grade": "A",
+    "overall_score": 91.5,
+    "risk_level": "Low",
+    "test_ratio": 0.867
+  },
+  "languages": {
+    "*.lock": 1.9607843137254901,
+    "TOML": 1.9607843137254901,
+    "Markdown": 19.607843137254903,
+    "Python": 54.90196078431373,
+    "JSON": 1.9607843137254901,
+    "*.txt": 1.9607843137254901,
+    "Shell": 11.76470588235294,
+    "YAML": 1.9607843137254901
+  }
+}
