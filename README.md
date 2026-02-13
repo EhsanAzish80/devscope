@@ -11,6 +11,7 @@ Analyze any repository in seconds. Get a maintainability grade, risk level, onbo
 [![Coverage: 82%](https://img.shields.io/badge/coverage-82%25-green.svg)]()
 [![PyPI version](https://img.shields.io/pypi/v/devscope.svg)](https://pypi.org/project/devscope/)
 [![Downloads](https://img.shields.io/pypi/dm/devscope.svg)](https://pypi.org/project/devscope/)
+[![GitHub Action](https://img.shields.io/badge/GitHub%20Action-devscope--action-blue?logo=github-actions)](https://github.com/EhsanAzish80/devscope-action)
 
 ## 🚀 Install in 10 Seconds
 
@@ -376,6 +377,90 @@ if [ $? -eq 2 ]; then
   exit 1
 fi
 ```
+
+---
+
+## 🎬 GitHub Action (Official)
+
+**The easiest way to integrate Devscope into your workflow** — official GitHub Action with automatic PR comments and quality gates.
+
+[![View on Marketplace](https://img.shields.io/badge/Marketplace-devscope--action-blue?logo=github)](https://github.com/marketplace/actions/devscope-code-health-check)
+
+### Quick Start
+
+Add to `.github/workflows/devscope.yml`:
+
+```yaml
+name: Code Health
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: EhsanAzish80/devscope-action@v1
+        with:
+          fail-under: B
+          max-risk: Medium
+```
+
+**What you get:**
+- ✅ Automatic PR comments with health metrics
+- ✅ Sticky updates (no spam)
+- ✅ CI quality gates with configurable thresholds
+- ✅ Fast caching (5-8s cached runs)
+- ✅ Works on public & private repos
+
+### Advanced Usage
+
+**Use outputs in other steps:**
+
+```yaml
+- uses: EhsanAzish80/devscope-action@v1
+  id: devscope
+
+- name: Check critical health
+  run: |
+    if [ "${{ steps.devscope.outputs.grade }}" == "F" ]; then
+      echo "::error::Code health is critical!"
+    fi
+```
+
+**Analyze specific directory:**
+
+```yaml
+- uses: EhsanAzish80/devscope-action@v1
+  with:
+    path: ./src
+    fail-under: B
+```
+
+**PR comment preview:**
+
+```
+📊 Devscope Report
+
+Maintainability: 🟢 B
+Risk: 🟢 Low
+Onboarding: Easy
+⚡ 0.82s
+
+Analyze your repo → pipx install devscope
+```
+
+**Learn more:** [devscope-action](https://github.com/EhsanAzish80/devscope-action)
 
 ---
 
