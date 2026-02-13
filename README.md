@@ -118,7 +118,7 @@ This repository is continuously analyzed by devscope.
 
 **Repo:** Devscope  
 **Files:** 45  
-**Lines:** 9,348  
+**Lines:** 9,345  
 **Languages:** Python (58%) · Markdown (18%) · Shell (13%)
 
 **Health:** B (82.5)  
@@ -128,7 +128,7 @@ This repository is continuously analyzed by devscope.
 **Tests:** 1.00 ratio  
 **Last commit:** today  
 
-**Top hotspot:** README.md (700 LOC, Very large file (700 LOC), No nearby tests)
+**Top hotspot:** README.md (697 LOC, Very large file (697 LOC), No nearby tests)
 
 ⚡ Scan time: 0.07s
 
