@@ -4,7 +4,7 @@ import json
 import logging
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class CacheManager:
         self.cache_dir = cache_dir
         self.enabled = enabled
         self.cache_file = cache_dir / "file_metadata.json"
-        self._cache: Dict[str, CacheEntry] = {}
+        self._cache: dict[str, CacheEntry] = {}
         self.stats = CacheStats(enabled=enabled)
 
         if enabled:
@@ -67,7 +67,7 @@ class CacheManager:
             return
 
         try:
-            with open(self.cache_file, "r", encoding="utf-8") as f:
+            with open(self.cache_file, encoding="utf-8") as f:
                 data = json.load(f)
 
             # Validate structure

@@ -118,7 +118,7 @@ class HotspotDetector:
             path_parts = rel_path.parts
 
             # Look for tests/ or __tests__/ as sibling or parent
-            for i, part in enumerate(path_parts[:-1]):
+            for i, _part in enumerate(path_parts[:-1]):
                 test_dir = self.root_path / Path(*path_parts[:i]) / "tests"
                 if test_dir.exists() and any(tf.is_relative_to(test_dir) for tf in test_files):
                     return True

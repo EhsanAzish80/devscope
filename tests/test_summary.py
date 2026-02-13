@@ -10,13 +10,8 @@ from click.testing import CliRunner
 from devscope.cli import cli
 from devscope.formatters import (
     format_days_since_commit,
-    format_dependencies,
     format_languages,
     generate_badge_url,
-    generate_badges,
-    generate_compact_summary,
-    generate_json_summary,
-    generate_markdown_summary,
     get_cache_color,
     get_grade_color,
     get_onboarding_color,
@@ -88,11 +83,11 @@ class TestBadgeGeneration:
         monkeypatch.delenv("CI", raising=False)
         monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
         assert is_ci_environment() is False
-        
+
         # Test with CI=true
         monkeypatch.setenv("CI", "true")
         assert is_ci_environment() is True
-        
+
         # Test with GITHUB_ACTIONS
         monkeypatch.delenv("CI", raising=False)
         monkeypatch.setenv("GITHUB_ACTIONS", "true")

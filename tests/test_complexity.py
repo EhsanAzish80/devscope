@@ -104,7 +104,7 @@ class TestComplexityAnalyzer:
             # Create a text file
             (root / "text.txt").write_text("hello world")
 
-            files = list(root.glob("*"))
+            list(root.glob("*"))
             analyzer = ComplexityAnalyzer(root)
 
             # Binary file should be detected

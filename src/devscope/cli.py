@@ -187,10 +187,7 @@ def create_tests_panel(result: AnalysisResult) -> Panel:
         )
 
         # Calculate inverse ratio, handle zero case
-        if tests.test_ratio > 0:
-            inverse_ratio = f"(1:{1 / tests.test_ratio:.1f})"
-        else:
-            inverse_ratio = "(0:∞)"
+        inverse_ratio = f"(1:{1 / tests.test_ratio:.1f})" if tests.test_ratio > 0 else "(0:∞)"
 
         content = f"""[bold]Test Files:[/bold] {tests.test_file_count}
 [bold]Source Files:[/bold] {tests.source_file_count}
@@ -275,11 +272,10 @@ def check_ci_thresholds(result: AnalysisResult, thresholds: CIThresholds) -> CIR
             failures.append(f"Invalid grade comparison: {e}")
 
     # Check risk level threshold
-    if thresholds.max_risk:
-        if health.risk_level > thresholds.max_risk:
-            failures.append(
-                f"Risk level {health.risk_level.value} exceeds maximum {thresholds.max_risk.value}"
-            )
+    if thresholds.max_risk and health.risk_level > thresholds.max_risk:
+        failures.append(
+            f"Risk level {health.risk_level.value} exceeds maximum {thresholds.max_risk.value}"
+        )
 
     # Check onboarding difficulty threshold
     if thresholds.max_onboarding:
@@ -322,7 +318,7 @@ def print_ci_summary(result: AnalysisResult, ci_result: CIResult) -> None:
             "F": "red",
         }.get(health.maintainability_grade, "white")
 
-        console.print(f"[bold]Code Health:[/bold]")
+        console.print("[bold]Code Health:[/bold]")
         console.print(f"  Grade: [{grade_color}]{health.maintainability_grade}[/{grade_color}]")
         console.print(f"  Risk Level: {health.risk_level.value}")
         console.print(f"  Onboarding: {health.onboarding_difficulty.value}\n")
@@ -388,7 +384,7 @@ def scan(path: Optional[str], no_git: bool, basic: bool, output_json: bool, no_c
         if not no_cache:
             cache_dir = Path(scan_path) / ".devscope_cache"
             cache_manager = CacheManager(cache_dir, enabled=True)
-            
+
             if clear_cache:
                 cache_manager.clear()
                 if not output_json:
@@ -524,7 +520,7 @@ def ci(
         if not no_cache:
             cache_dir = Path(scan_path) / ".devscope_cache"
             cache_manager = CacheManager(cache_dir, enabled=True)
-            
+
             if clear_cache:
                 cache_manager.clear()
 
@@ -608,7 +604,7 @@ def summary(
         if not no_cache:
             cache_dir = Path(scan_path) / ".devscope_cache"
             cache_manager = CacheManager(cache_dir, enabled=True)
-            
+
             if clear_cache:
                 cache_manager.clear()
 

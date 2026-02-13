@@ -5,7 +5,6 @@ import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-import pytest
 from click.testing import CliRunner
 
 from devscope.cache import CacheEntry, CacheManager, CacheStats

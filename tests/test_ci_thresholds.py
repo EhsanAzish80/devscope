@@ -9,8 +9,6 @@ from click.testing import CliRunner
 
 from devscope.cli import cli
 from devscope.models import (
-    CIResult,
-    CIThresholds,
     Grade,
     OnboardingDifficulty,
     RiskLevel,

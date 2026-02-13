@@ -274,5 +274,5 @@ class TestScoringEngine:
         assert "overall" in score.score_breakdown
 
         # All scores should be in valid range
-        for component, value in score.score_breakdown.items():
+        for _component, value in score.score_breakdown.items():
             assert 0 <= value <= 100

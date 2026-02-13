@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 try:
     import git
@@ -28,7 +28,7 @@ class GitIntelligence:
             root_path: Root directory of the project
         """
         self.root_path = root_path
-        self.repo: Optional["Repo"] = None
+        self.repo: Optional[Repo] = None
         self._initialize_repo()
 
     def _initialize_repo(self) -> None:
