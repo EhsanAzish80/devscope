@@ -1,7 +1,7 @@
 """Formatters for devscope output - badges, markdown, summaries."""
 
 import os
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import quote
 
 from devscope.models import AnalysisResult, Grade, OnboardingDifficulty, RiskLevel
@@ -309,7 +309,7 @@ def generate_compact_summary(result: AnalysisResult) -> str:
     return " ".join(parts)
 
 
-def generate_json_summary(result: AnalysisResult) -> dict:
+def generate_json_summary(result: AnalysisResult) -> dict[str, Any]:
     """Generate JSON summary for bots and integrations.
     
     Args:
@@ -318,7 +318,7 @@ def generate_json_summary(result: AnalysisResult) -> dict:
     Returns:
         Dictionary with summary data
     """
-    summary = {
+    summary: dict[str, Any] = {
         "repo": result.repo_name,
         "total_files": result.total_files,
         "total_lines": result.total_lines,
@@ -329,7 +329,7 @@ def generate_json_summary(result: AnalysisResult) -> dict:
     if result.health_score:
         summary["health"] = {
             "grade": result.health_score.maintainability_grade,
-            "score": result.health_score.score_breakdown.get("overall", 0),
+            "score": result.health_score.score_breakdown.get("overall", 0.0),
             "risk": result.health_score.risk_level.value,
             "onboarding": result.health_score.onboarding_difficulty.value,
         }

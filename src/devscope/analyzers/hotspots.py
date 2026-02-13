@@ -145,7 +145,7 @@ class HotspotDetector:
         """
         # LOC component (0-100)
         if loc > self.HIGH_LOC_THRESHOLD:
-            loc_score = 100
+            loc_score = 100.0
         elif loc > self.MEDIUM_LOC_THRESHOLD:
             loc_score = 50 + (loc - self.MEDIUM_LOC_THRESHOLD) * 50 / (
                 self.HIGH_LOC_THRESHOLD - self.MEDIUM_LOC_THRESHOLD
@@ -154,7 +154,7 @@ class HotspotDetector:
             loc_score = loc * 50 / self.MEDIUM_LOC_THRESHOLD
 
         # Depth component (0-100)
-        depth_score = min(100, (depth / self.HIGH_DEPTH_THRESHOLD) * 100)
+        depth_score = float(min(100, (depth / self.HIGH_DEPTH_THRESHOLD) * 100))
 
         # Test proximity component (0 or 100)
         test_score = 0 if has_nearby_tests else 100

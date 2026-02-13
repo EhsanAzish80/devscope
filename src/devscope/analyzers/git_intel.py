@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 try:
     import git
@@ -10,8 +10,12 @@ try:
     HAS_GIT = True
 except ImportError:
     HAS_GIT = False
+    git = None  # type: ignore
 
 from devscope.models import GitMetrics
+
+if TYPE_CHECKING:
+    from git import Repo
 
 
 class GitIntelligence:
@@ -24,7 +28,7 @@ class GitIntelligence:
             root_path: Root directory of the project
         """
         self.root_path = root_path
-        self.repo: Optional[object] = None
+        self.repo: Optional["Repo"] = None
         self._initialize_repo()
 
     def _initialize_repo(self) -> None:
