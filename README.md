@@ -61,11 +61,11 @@ This repository is continuously analyzed by devscope.
 ![Badge](https://img.shields.io/badge/maintainability-B-green)
 ![Badge](https://img.shields.io/badge/risk-Low-green)
 ![Badge](https://img.shields.io/badge/onboarding-Easy-blue)
-![Badge](https://img.shields.io/badge/cache-92%25-success)
+![Badge](https://img.shields.io/badge/cache-0%25-orange)
 
 **Repo:** devscope  
 **Files:** 36  
-**Lines:** 7,975  
+**Lines:** 8,006  
 **Languages:** Python (72%) · Markdown (14%) · Shell (6%)
 
 **Health:** B (82.5)  
@@ -75,9 +75,9 @@ This repository is continuously analyzed by devscope.
 **Tests:** 1.00 ratio  
 **Last commit:** today  
 
-**Top hotspot:** uv.lock (821 LOC, Very large file (821 LOC), No nearby tests)
+**Top hotspot:** README.md (515 LOC, Very large file (515 LOC), No nearby tests)
 
-⚡ Scan time: 0.07s (cache: 92% hit rate)
+⚡ Scan time: 0.06s
 
 _This report is automatically updated on every push._
 
