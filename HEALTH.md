@@ -7,7 +7,7 @@
 
 **Repo:** Devscope  
 **Files:** 37  
-**Lines:** 7,714  
+**Lines:** 7,710  
 **Languages:** Python (70%) · Shell (14%) · Markdown (8%)
 
 **Health:** B (82.5)  
@@ -17,6 +17,6 @@
 **Tests:** 1.00 ratio  
 **Last commit:** today  
 
-**Top hotspot:** README.md (572 LOC, Very large file (572 LOC), No nearby tests)
+**Top hotspot:** README.md (568 LOC, Very large file (568 LOC), No nearby tests)
 
 ⚡ Scan time: 0.06s
