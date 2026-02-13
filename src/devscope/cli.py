@@ -653,17 +653,17 @@ def inject(
     end_marker: str,
 ) -> None:
     """Inject health metrics into README between markers.
-    
+
     Updates README.md (or specified file) with current health metrics between
     marker comments. Only writes if content has changed (idempotent).
-    
+
     Markers in your README:
         <!-- DEVSCOPE_START -->
         (health block will be injected here)
         <!-- DEVSCOPE_END -->
-    
+
     README_PATH: Path to README file (default: ./README.md)
-    
+
     Exit codes:
       - 0: Success (content updated or unchanged)
       - 1: Error (missing markers, invalid path, etc.)
@@ -672,66 +672,66 @@ def inject(
     # Determine paths
     readme_file = Path(readme_path) if readme_path else Path.cwd() / "README.md"
     scan_path = Path(repo_path) if repo_path else readme_file.parent
-    
+
     readme_file = readme_file.resolve()
     scan_path = scan_path.resolve()
-    
+
     # Validate README exists
     if not readme_file.exists():
         console.print(f"[red]Error:[/red] README not found: {readme_file}")
         sys.exit(1)
-    
+
     try:
         # Read current README content
-        with open(readme_file, "r", encoding="utf-8") as f:
+        with open(readme_file, encoding="utf-8") as f:
             original_content = f.read()
-        
+
         # Check for markers
         if start_marker not in original_content or end_marker not in original_content:
             console.print(f"[red]Error:[/red] Markers not found in {readme_file.name}")
-            console.print(f"\nAdd these markers to your README:\n")
+            console.print("\nAdd these markers to your README:\n")
             console.print(f"    {start_marker}")
             console.print(f"    {end_marker}\n")
             sys.exit(1)
-        
+
         # Extract sections to prepare clean version for analysis
         start_idx = original_content.find(start_marker)
         end_idx = original_content.find(end_marker)
-        
+
         if start_idx == -1 or end_idx == -1 or start_idx >= end_idx:
             console.print(f"[red]Error:[/red] Invalid marker positions in {readme_file.name}")
             sys.exit(1)
-        
+
         # Extract existing health block
         start_idx = original_content.find(start_marker)
         end_idx = original_content.find(end_marker)
-        
+
         if start_idx == -1 or end_idx == -1 or start_idx >= end_idx:
             console.print(f"[red]Error:[/red] Invalid marker positions in {readme_file.name}")
             sys.exit(1)
-        
+
         before_marker = original_content[:start_idx + len(start_marker)]
         after_marker = original_content[end_idx:]
-        
+
         # Set up cache manager
         cache_manager = None
         if not no_cache:
             cache_dir = Path(scan_path) / ".devscope_cache"
             cache_manager = CacheManager(cache_dir, enabled=True)
-        
+
         # Run analysis
         analyzer = CodebaseAnalyzer(
-            scan_path, 
-            detect_git=not no_git, 
-            enable_intelligence=True, 
+            scan_path,
+            detect_git=not no_git,
+            enable_intelligence=True,
             cache_manager=cache_manager
         )
-        
+
         if not check:
             console.print(f"[dim]Analyzing {scan_path.name}...[/dim]")
-        
+
         result = analyzer.analyze()
-        
+
         # Exclude README from line count to avoid circular dependency
         # (health block content affects the total lines, which is displayed in the health block)
         if scan_path in readme_file.parents:
@@ -739,39 +739,39 @@ def inject(
             result.total_lines = max(0, result.total_lines - readme_lines)
             # Also decrement file count
             result.total_files = max(1, result.total_files - 1)
-        
+
         # Generate new health block
         health_block = generate_health_block(result)
-        
+
         # Build new content
         if not health_block.endswith('\n'):
             health_block += '\n'
-        
+
         new_content = f"{before_marker}\n{health_block}{after_marker}"
-        
+
         # Check if content changed
         if new_content == original_content:
             # No change needed - file already has correct content
             if check:
-                console.print(f"[green]✓[/green] No changes needed")
+                console.print("[green]✓[/green] No changes needed")
                 sys.exit(0)
             else:
-                console.print(f"[green]✓[/green] Health block up to date (no changes)")
+                console.print("[green]✓[/green] Health block up to date (no changes)")
                 return
-        
+
         # Check mode - report difference and exit
         if check:
-            console.print(f"[yellow]⚠[/yellow]  Health block needs update")
+            console.print("[yellow]⚠[/yellow]  Health block needs update")
             sys.exit(2)
-        
+
         # Write updated content
         with open(readme_file, "w", encoding="utf-8") as f:
             f.write(new_content)
-        
+
         console.print(f"[green]✓[/green] Updated {readme_file.name}")
         console.print(f"[dim]  Grade: {result.health_score.maintainability_grade if result.health_score else 'N/A'}[/dim]")
         console.print(f"[dim]  Scan time: {result.scan_time:.2f}s[/dim]")
-    
+
     except Exception as e:
         console.print(f"\n[red]Error:[/red] {str(e)}", style="bold")
         import traceback
