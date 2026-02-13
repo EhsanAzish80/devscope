@@ -9,26 +9,22 @@ Analyze any repository in seconds. Get a maintainability grade, risk level, onbo
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests: 133 passing](https://img.shields.io/badge/tests-133%20passing-brightgreen.svg)]()
 [![Coverage: 82%](https://img.shields.io/badge/coverage-82%25-green.svg)]()
-
-<!-- PyPI badges will be added after first release (v0.1.0) -->
-<!-- [![PyPI version](https://img.shields.io/pypi/v/devscope.svg)](https://pypi.org/project/devscope/) -->
-<!-- [![Downloads](https://img.shields.io/pypi/dm/devscope.svg)](https://pypi.org/project/devscope/) -->
+[![PyPI version](https://img.shields.io/pypi/v/devscope.svg)](https://pypi.org/project/devscope/)
+[![Downloads](https://img.shields.io/pypi/dm/devscope.svg)](https://pypi.org/project/devscope/)
 
 ## 🚀 Install in 10 Seconds
 
-**Coming soon to PyPI! Until v0.1.0 release, install from source:**
+```bash
+pipx install devscope
+devscope scan .
+```
 
+**Or install from source:**
 ```bash
 git clone https://github.com/EhsanAzish80/Devscope.git
 cd Devscope
 uv sync
 uv run devscope scan .
-```
-
-**After v0.1.0 release (PyPI):**
-```bash
-pipx install devscope
-devscope scan .
 ```
 
 That's it. No config files. No setup. Just intelligence.
