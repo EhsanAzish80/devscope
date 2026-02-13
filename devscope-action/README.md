@@ -9,7 +9,26 @@ Automatically analyze your repository and post maintainability metrics on every 
 
 ---
 
-## 🎯 Features
+## � Why Devscope in CI?
+
+**Shift-left code quality** — catch maintainability issues before they reach production.
+
+- ✅ **Instant feedback** — developers see health metrics within seconds on PRs
+- ✅ **Preventative maintenance** — block merges when quality drops below thresholds
+- ✅ **No configuration required** — works out of the box with sensible defaults
+- ✅ **Language agnostic** — analyzes Python, JavaScript, TypeScript, Go, Rust, Java, and more
+- ✅ **Fast & cached** — pipx dependencies cached between runs (~5-8s after first run)
+- ✅ **Non-intrusive** — sticky PR comments (updates in place, no spam)
+
+**Use cases:**
+- Enforce maintainability standards across teams
+- Monitor tech debt trends in CI
+- Gate releases on code health thresholds
+- Onboard new contributors with clear quality metrics
+
+---
+
+## �🎯 Features
 
 - ✅ **Automatic PR comments** with health metrics
 - ✅ **Sticky updates** — no comment spam
@@ -47,9 +66,9 @@ jobs:
 
 **That's it!** 🎉
 
-On every PR, you'll get a comment like this:
+**Example PR Comment:**
 
-```
+````
 📊 Devscope Report
 
 Maintainability: 🟢 B
@@ -57,13 +76,32 @@ Risk: 🟢 Low
 Onboarding: Easy
 ⚡ 0.82s
 
-Full summary ▼
+<details>
+<summary>Full summary ▼</summary>
+
 ───────────────────────────────────────
 Devscope: B · Low risk · Easy onboarding · 0.78 tests · 0.82s ⚡
 
-Analyze your repo → pipx install devscope
+Files: 1,247
+Lines: 45,892
+Languages: Python (45%) · TypeScript (33%) · JavaScript (12%)
+
+**Metrics:**
+- Maintainability Grade: B (82.5/100)
+- Risk Level: Low
+- Onboarding Difficulty: Easy
+- Test Coverage: 78%
+
+Analyze your repo → `pipx install devscope`
 Updated: Thu, 13 Feb 2026 15:30:00 GMT
-```
+</details>
+````
+
+**Features:**
+- ✅ Emoji indicators 🟢 green (good), 🔴 red (critical)
+- ✅ Sticky updates (edits same comment, no spam)
+- ✅ Collapsible full summary
+- ✅ Performance timing
 
 ---
 
@@ -263,11 +301,19 @@ jobs:
 
 This action uses **aggressive caching** for fast runs:
 
-- **First run:** ~15-20s (install devscope)
-- **Cached runs:** ~5-8s (deps cached)
-- **devscope analysis:** ~0.5-2s (depending on repo size)
+| Phase | First Run | Cached Runs |
+|-------|-----------|-------------|
+| Setup Python | ~5s | ~2s (cached) |
+| Install devscope | ~10-15s | ~3-5s (pipx cache) |
+| Analysis | ~0.5-2s | ~0.5-2s |
+| **Total** | **~15-20s** | **~5-8s** ⚡ |
 
-**Total:** Most runs complete in **under 10 seconds** ⚡
+**Optimization tips:**
+- Use `fetch-depth: 0` for accurate git metrics
+- Enable pipx caching (automatic in this action)
+- Run on push + PR for best cache hits
+
+Most runs complete in **under 10 seconds** after initial setup ⚡
 
 ---
 
