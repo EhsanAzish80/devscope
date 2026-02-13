@@ -2,10 +2,10 @@
 
 name: Monorepo Health Check
 
+# This example is workflow_dispatch-only to avoid running in this repository.
+# Copy into your project and adjust triggers as needed.
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read

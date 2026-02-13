@@ -1,9 +1,8 @@
 name: Test Action
 
+# This workflow is workflow_dispatch-only to avoid running on every change in this repository.
+# Enable push/PR triggers in forks if you want continuous validation.
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
   workflow_dispatch:
 
 jobs:
