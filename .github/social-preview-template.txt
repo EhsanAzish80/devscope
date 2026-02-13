@@ -1,0 +1,86 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                         ┃
+┃                                                                         ┃
+┃                           D e v s c o p e                               ┃
+┃                                                                         ┃
+┃                  Universal Codebase Intelligence                        ┃
+┃                                                                         ┃
+┃                                                                         ┃
+┃              ┌─────────────────────────────────────────┐                ┃
+┃              │ Devscope: B · Low risk · Easy          │                ┃
+┃              │ onboarding · 0.06s ⚡                   │                ┃
+┃              └─────────────────────────────────────────┘                ┃
+┃                                                                         ┃
+┃                                                                         ┃
+┃                                                                         ┃
+┃                                                                         ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+SOCIAL PREVIEW TEMPLATE (1280x640)
+===================================
+
+Use this as a layout reference for creating the actual image.
+
+SPECIFICATIONS:
+- Dimensions: 1280px × 640px (2:1 ratio)
+- Format: PNG with transparency (or solid dark background)
+- Background: Dark gradient (#0a0e27 → #1a1f3a) or solid (#0d1117)
+
+TEXT LAYOUT:
+
+1. Title "Devscope"
+   - Position: Center-top (320px from top)
+   - Font: Bold sans-serif, ~120px
+   - Color: #58a6ff (GitHub blue) or #ffffff
+
+2. Subtitle "Universal Codebase Intelligence"
+   - Position: Below title (420px from top)
+   - Font: Regular sans-serif, ~48px
+   - Color: #c9d1d9 (light gray)
+
+3. Sample Output Box
+   - Position: Center-bottom (480px from top)
+   - Content: "Devscope: B · Low risk · Easy onboarding · 0.06s ⚡"
+   - Font: Monospace, ~38px
+   - Color: #79c0ff (light blue)
+   - Background: Semi-transparent box (#1a1f3a with 60% opacity)
+   - Padding: 20px
+   - Border-radius: 8px
+
+OPTIONAL ENHANCEMENTS:
+- Subtle grid pattern in background
+- Gradient accent line at bottom (2px, #58a6ff)
+- GitHub icon or code bracket icon (top-left, subtle)
+- Soft glow effect on text for depth
+
+DESIGN TOOL RECOMMENDATIONS:
+
+1. Figma (Free, Web-based)
+   - Create 1280x640 frame
+   - Use text layers for content
+   - Export as PNG
+
+2. Canva (Free templates)
+   - Search "GitHub social media"
+   - Customize with devscope content
+   - Download as PNG
+
+3. Photopea (Free, like Photoshop)
+   - Create new image 1280x640
+   - Add layers for text/shapes
+   - Export as PNG
+
+UPLOAD INSTRUCTIONS:
+1. Go to: https://github.com/EhsanAzish80/devscope/settings
+2. Scroll to "Social preview"
+3. Click "Upload an image"
+4. Select your 1280x640 PNG file
+5. Preview will show how it appears in social shares
+
+The image will appear when the repo is shared on:
+- Twitter/X
+- Discord
+- Slack
+- LinkedIn
+- Reddit
+- Google search results
